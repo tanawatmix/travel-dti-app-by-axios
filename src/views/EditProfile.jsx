@@ -14,10 +14,12 @@ import Profile from "./../assets/profile.png";
 import { Link } from "react-router-dom";
 
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { useEffect, useState } from "react";
+import { Link , useNavigate} from "react-router-dom";
 import { styled } from "@mui/material/styles";
-
+import Profile from "./../assets/profile.png";
 import Travel from "./../assets/travel.png";
-// import Profile from './../assets/profile.png'
+//===========================End of Import======================================
 
 function EditProfile() {
   const [travellerFullname, setTravellerFullname] = useState("");
@@ -27,19 +29,28 @@ function EditProfile() {
   const [travellerId, setTravellerId] = useState("");
 
   const [travellerNewImage, setTravellerNewImage] = useState(null); //*****/
+  const [travellerNewFullname, setTravellerNewFullname] = useState(""); //*****/
 
+
+  const navigator = useNavigate();
+
+  //UseEffect ========================================
   useEffect(() => {
     //เอาข้อมูลใน memory มาแสดงที่ AppBar
     //อ่านข้อมูลจาก memory เก็บในตัวแปร
+
     const traveller = JSON.parse(localStorage.getItem("traveller"));
+
     //เอาข้อมูลในตัวแปรกำหนดให้กับ state ที่สร้างไว้
     setTravellerFullname(traveller.travellerFullname);
     setTravellerImage(traveller.travellerImage);
     setTravellerEmail(traveller.travellerEmail);
     setTravellerPassword(traveller.travellerPassword);
-    setTravellerId(traveller.setTravellerId);
+    setTravellerId(traveller.travellerId);
+    setTravellerNewFullname(traveller.travellerFullname);
+    
   }, []);
-
+//Select file func +++++++++++++++++++++++++++
   const handleSelectFileClick = (e) => {
     const file = e.target.files[0];
 
@@ -59,6 +70,53 @@ function EditProfile() {
     whiteSpace: "nowrap",
     width: 1,
   });
+
+   //EditClick func +++++++++++++++++++++++++++
+   const handleEditProfileClick = async (e) => {
+    //Validate Register Button
+    e.preventDefault();
+    if (travellerNewFullname.trim().length == 0) {
+      alert("ป้อนชื่อ-นามสกุลด้วย");
+    } else if (travellerEmail.trim().length == 0) {
+      alert("ป้อนชื่อผู้ใช้ด้วย(Email)");
+    } else if (travellerPassword.trim().length == 0) {
+      alert("ป้อนรหัสผ่านด้วย");
+    } else {
+      //Send data to API, save to DB and redirect to Login page.
+      //Packing data
+      const formData = new FormData();
+
+      formData.append("travellerFullname", travellerNewFullname);
+      formData.append("travellerEmail", travellerEmail);
+      formData.append("travellerPassword", travellerPassword);
+      formData.append("travellerId", travellerId);
+
+      if (travellerNewImage){
+        formData.append('travellerImage', travellerNewImage);
+      }
+
+      //Send data to API
+      try {
+        const response = await fetch(`http://localhost:4000/traveller/${travellerId}`, {
+          method: "PUT",
+          body: formData,
+        });
+        if (response.status == 200) {
+          alert("แก้ไขโปรไฟล์สําเร็จOwO");
+          localStorage.clear();//clear old data
+          const data = await response.json(); 
+          localStorage.setItem("traveller", JSON.stringify(data["data"]));//set new data
+          navigator("/mytravel");//go to MyTravel
+          // window.location.href("/")
+        } else {
+          alert("แก้ไขโปรไฟล์ไม่สำเร็จโปรดลองใหม่อีกครั้งTwT");
+        }
+      } catch (error) {
+        alert("พบข้อผิดพลาดในการแก้ไขโปรไฟล์", error);
+      }
+    }
+  };
+  
 
   return (
     <>
@@ -134,8 +192,8 @@ function EditProfile() {
           {/* TextField travellerFullname============================= */}
           <TextField
             fullWidth
-            value={travellerFullname}
-            onChange={(e) => setTravellerFullname(e.target.value)}
+            value={travellerNewFullname}
+            onChange={(e) => setTravellerNewFullname(e.target.value)}
           />
           <Typography sx={{ fontWeight: "bold", mt: 4, mb: 1 }}>
             ชื่อผู้ใช้ (E-Mail)
@@ -156,7 +214,7 @@ function EditProfile() {
             value={travellerPassword}
             onChange={(e) => setTravellerPassword(e.target.value)}
           />
-
+          {/* Traveller Image=========================================== */}
           <Avatar
             src={
               travellerNewImage == null
@@ -167,7 +225,7 @@ function EditProfile() {
             sx={{ width: 150, height: 150, mx: "auto", my: 3 }}
             variant="rounded"
           />
-
+          {/* SelectFileButton======================================= */}
           <Box sx={{ display: "flex", justifyContent: "center" }}>
             <Button
               component="label"
@@ -183,13 +241,16 @@ function EditProfile() {
             </Button>
           </Box>
 
+          {/* Edit Button   =====================================*/}
+          <Link onClick={handleEditProfileClick}>
           <Button
             variant="contained"
             fullWidth
-            sx={{ mt: 4, py: 2, backgroundColor: "#259e69" }}
+            sx={{ mt: 2, py: 2, backgroundColor: "#259e69" }}
           >
-            แก้ไข Profile
+            แก้ไขข้อมูลส่วนตัว
           </Button>
+          </Link>
 
           <Link
             to="/mytravel"

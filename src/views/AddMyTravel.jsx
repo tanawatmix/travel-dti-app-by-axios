@@ -137,9 +137,9 @@ function AddMyTravel() {
               </Link>
               <Avatar
                 src={
-                  travellerImage == ""
-                    ? Profile
-                    : `http://localhost:4000/images/traveller/${travellerImage}`
+                  travelImage == ""
+                    ? Travel
+                    : `http://localhost:4000/images/traveller/${travelImage}`
                 }
               />
               {/* logout */}
