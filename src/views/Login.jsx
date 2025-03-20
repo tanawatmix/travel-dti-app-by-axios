@@ -1,16 +1,16 @@
-import React, { use } from "react";
+import axios from "axios";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Box, Typography, Avatar, TextField, Button } from "@mui/material"; //material ui
 import Travel from "./../assets/travel.png"; //Logo image
-import { Link } from "react-router-dom";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+
 
 function Login() {
   const [travellerEmail, setTravellerEmail] = useState("");
   const [travellerPassword, setTravellerPassword] = useState("");
   const navigator = useNavigate();
 
-  
+
   const handleLoginClick = async (e) => {
     e.preventDefault();
     // Validate UI
@@ -23,18 +23,21 @@ function Login() {
     } else {
       //send data to API and go to MyTravel.jsx("/mytravel") GET
       try {
-        const response = await fetch(
-          `http://localhost:4000/traveller/${travellerEmail}/${travellerPassword}`,
-          {
-            method: "GET",
-          }
+        const response = await axios.get(
+          `http://localhost:4000/traveller/${travellerEmail}/${travellerPassword}`
         );
         if (response.status == 200) {
           //get data Traveller and save in memory
-          const data = await response.json();
-          localStorage.setItem("traveller", JSON.stringify(data["data"]));
+
+          //Use Fetch===========================
+          // const data = await response.json();
+          // localStorage.setItem("traveller", JSON.stringify(data["data"]));
           //go to (/mytravel)
-          navigator("/mytravel");
+
+          //Use Axios===========================
+          localStorage.setItem("traveller", JSON.stringify(response.data["data"]));
+
+          navigator("/MyTravel");
         } else if (response.status == 404) {
           alert("ชื่อผู้ใช้(Email)หรือรหัสผ่านไม่ถูกต้อง");
         } else {

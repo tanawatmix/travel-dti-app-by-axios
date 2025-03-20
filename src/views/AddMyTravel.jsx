@@ -1,22 +1,14 @@
-import React from "react";
-import {
-  AppBar,
-  Box,
-  Toolbar,
-  Typography,
-  Button,
-  IconButton,
-  Avatar,
-  TextField,
-  styled,
+import {Box,AppBar,Toolbar,IconButton,Typography,Button,Avatar,TextField,styled,
 } from "@mui/material";
+import React from "react";
+
 import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useEffect, useState } from "react";
+import Profile from "./../assets/profile.png";
 import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import Travel from "./../assets/travel.png"; //Logo image
-import Profile from "../assets/profile.png";
+import Travel from "./../assets/travel.png";
+import axios from "axios";
 
 function AddMyTravel() {
   const [travellerFullname, setTravellerFullname] = useState("");
@@ -24,35 +16,18 @@ function AddMyTravel() {
 
   const [travelImage, setTravelImage] = useState("");
   const [travelPlace, setTravelPlace] = useState("");
-  const [travelStartDate, setTravelStartDate] = useState("");
-  const [travelEndDate, setTravelEndDate] = useState("");
   const [travelCostTotal, setTravelCostTotal] = useState("");
+  const [travelStartDate, setTravelStartDate] = useState("");
+  const [travelEndDate, seTtravelEndDate] = useState("");
   const [travellerId, setTravellerId] = useState("");
 
-  const navigator = useNavigate();
-
-  useEffect(() => {
-    //take data from localstorage and show at AppBar
-    //read data in memory
-
-    const traveller = JSON.parse(localStorage.getItem("traveller"));
-    //take data from variable and use with state
-
-    setTravellerFullname(traveller.travellerFullname);
-    setTravellerImage(traveller.travellerImage);
-    setTravellerId(traveller.travellerId);
-
-    setTravelImage(traveller.travelImage);
-  }, []);
-
-  //select file func +++++++++++++++++++++++++++
-  const handleSelectFileClick = (e) => {
+ const handleSelectFileClick = (e) => {
     const file = e.target.files[0];
     if (file) {
       setTravelImage(file);
     }
   };
-
+  //select image func
   const SelectFileBt = styled("input")({
     clip: "rect(0 0 0 0)",
     clipPath: "inset(50%)",
@@ -64,11 +39,9 @@ function AddMyTravel() {
     whiteSpace: "nowrap",
     width: 1,
   });
-  //+++++++++++++++++++++++++++++++++++++++++++
+
   const handleSaveTravelClick = async (e) => {
-    console.log(travelPlace, travelStartDate, travelEndDate, travelCostTotal);
-    //Validate Register Button
-    e.preventDefault();
+  e.preventDefault();
     if (travelPlace.trim().length == 0) {
       alert("ป้อนสถานที่ด้วย");
     } else if (travelStartDate.trim().length == 0) {
@@ -76,41 +49,53 @@ function AddMyTravel() {
     } else if (travelEndDate.trim().length == 0) {
       alert("ป้อนวันที่กลับด้วย");
     } else if (travelCostTotal.trim().length == 0) {
-      alert("ป้อนค่าใช้จ่ายในการเดินทางด้วย");
+      alert("ป้อนค่าใช้จ่ายด้วย");
     } else {
       //ส่งข้อมูลไปให้ API บันทึงลง DB แล้ว redirect ไปหน้า Login
-      //Packing data
-      const formData = new FormData();
+    const formData = new FormData();
 
       formData.append("travelPlace", travelPlace);
+      formData.append("travelCostTotal", travelCostTotal);
       formData.append("travelStartDate", travelStartDate);
       formData.append("travelEndDate", travelEndDate);
-      formData.append("travelCostTotal", travelCostTotal);
+      
       formData.append("travellerId", travellerId);
 
-      if (travellerImage) {
+      if (travelImage) {
         formData.append("travelImage", travelImage);
       }
-
-      //send data from formData to API (http://localhost:4000/travel) POST
+      //ส่งข้อมูลไปให้ API (https://localhost:4000/traveller/) บันทึงลง DB
       try {
-        const response = await fetch("http://localhost:4000/travel/", {
-          method: "POST",
-          body: formData,
+        // const response = await fetch("http://localhost:4000/travel/", {
+        //   method: "POST",
+        //   body: formData,
+        // });
+        const response = await axios.post("http://localhost:4000/travel/", formData,{
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         });
+
         if (response.status == 201) {
-          alert("เพิ่มบันทึกการเดินทางสําเร็จOwO");
-          navigator("/mytravel");
-          // window.location.href("/")
+          alert("บันทึกการเดินทางสําเร็จ");
+          window.location.href = "/mytravel";
         } else {
-          alert("เพิ่มบันทึกการเดินทางไม่สำเร็จโปรดลองใหม่อีกครั้งTwT");
+          alert("บันทึกการเดินทางไม่สําเร็จ กรุณาลองใหม่อีกครั้ง");
         }
       } catch (error) {
-        alert("พบข้อผิดพลาดในเพิ่มบันทึกการเดินทาง+_+", error);
+        alert("พบข้อผิดพลาด", error);
       }
     }
   };
 
+  useEffect(() => {
+    //เอาข้อมูลใน memory มาแสดงที่ Appbar
+    const traveller = JSON.parse(localStorage.getItem("traveller"));
+    //เอาข้อมูลในตัวแปรมากำหนดให้ตัวแปรใน useState
+    setTravellerFullname(traveller.travellerFullname);
+    setTravellerImage(traveller.travellerImage);
+    setTravellerId(traveller.travellerId);
+  }, []);
   return (
     <>
       <Box sx={{ width: "100%" }}>
@@ -124,30 +109,36 @@ function AddMyTravel() {
                 aria-label="menu"
                 sx={{ mr: 2 }}
               >
-                <Link to="/mytravel">
-                  <FlightTakeoffIcon sx={{ color: "yellow" }} />
-                </Link>
+                <FlightTakeoffIcon sx={{ color: "yellow" }} />
               </IconButton>
               <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                เพิ่มบันทึกการเดินทาง
+                บันทึกการเดินทาง
               </Typography>
-              {/* Go to editprofile */}
-              <Link to="/editprofile">
+              <Link
+                to="/editprofile"
+                style={{
+                  textDecoration: "none",
+                  color: "white",
+                  marginLeft: "10px",
+                  fontWeight: "bold",
+                }}
+              >
                 <Button color="inherit">{travellerFullname}</Button>
               </Link>
               <Avatar
                 src={
-                  travelImage == ""
-                    ? Travel
-                    : `http://localhost:4000/images/traveller/${travelImage}`
+                  travellerImage == ""
+                    ? Profile
+                    : `http://localhost:4000/images/traveller/${travellerImage}`
                 }
               />
-              {/* logout */}
+
               <Link
-                to="/"
+                to={"/"}
                 style={{
-                  color: "red",
+
                   textDecoration: "none",
+                  color: "red",
                   marginLeft: "10px",
                   fontWeight: "bold",
                 }}
@@ -159,8 +150,7 @@ function AddMyTravel() {
         </Box>
         <Box sx={{ width: "70%", boxShadow: 4, mx: "auto", p: 5, my: 4 }}>
           <Typography
-            variant="h4"
-            component="div"
+            variant="h5"
             sx={{ textAlign: "center", fontWeight: "bold" }}
           >
             Travel DTI
@@ -171,54 +161,69 @@ function AddMyTravel() {
             alt="travel logo"
             sx={{ width: 150, height: 150, mx: "auto", my: 5 }}
           ></Avatar>
+          {/* Add text =====================================*/}
           <Typography
-            variant="h4"
-            component="div"
+            variant="h5"
             sx={{ textAlign: "center", fontWeight: "bold" }}
           >
             เพิ่มการเดินทาง
           </Typography>
 
+          {/* TextField Place  =====================================*/}
           <Typography sx={{ fontWeight: "bold", mt: 4, mb: 1 }}>
             สถานที่ที่เดินทางไป
           </Typography>
-          {/* TextField  Place =====================================*/}
+
           <TextField
             fullWidth
             value={travelPlace}
             onChange={(e) => setTravelPlace(e.target.value)}
           />
 
-          <Typography sx={{ fontWeight: "bold", mt: 2, mb: 1 }}>
+          {/* TextField DateStart  =====================================*/}
+          <Typography sx={{ fontWeight: "bold", mt: 4, mb: 1 }}>
             วันที่เดินทางไป
           </Typography>
-          {/* TextField StartDate  =====================================*/}
+
           <TextField
             fullWidth
             value={travelStartDate}
             onChange={(e) => setTravelStartDate(e.target.value)}
           />
 
-          <Typography sx={{ fontWeight: "bold", mt: 2, mb: 1 }}>
+          {/* TextField DateEnd  =====================================*/}
+          <Typography sx={{ fontWeight: "bold", mt: 4, mb: 1 }}>
             วันที่เดินทางกลับ
           </Typography>
-          {/* TextField EndDate  =====================================*/}
+
           <TextField
             fullWidth
             value={travelEndDate}
-            onChange={(e) => setTravelEndDate(e.target.value)}
+            onChange={(e) => seTtravelEndDate(e.target.value)}
           />
 
-          <Typography sx={{ fontWeight: "bold", mt: 2, mb: 1 }}>
-            ค่าใช้จ่ายในการเดินทาง
+          {/* TextField Cost  =====================================*/}
+          <Typography sx={{ fontWeight: "bold", mt: 4, mb: 1 }}>
+            ต่าใช้จ่ายในการเดินทาง
           </Typography>
-          {/* TextField costTravel  =====================================*/}
+
           <TextField
             fullWidth
+            type="number"
             value={travelCostTotal}
             onChange={(e) => setTravelCostTotal(e.target.value)}
           />
 
+          {/* Profile Image =====================================*/}
+          {/* <Avatar
+          src={
+            travelImage == null
+              ? Profile
+              : URL.createObjectURL(travelImage)
+          }
+          alt="travel logo"
+          sx={{ width: 150, height: 150, mx: "auto", my: 5 }}
+        ></Avatar> */}
           <Avatar
             src={
               travelImage && travelImage instanceof Blob
@@ -250,15 +255,14 @@ function AddMyTravel() {
               />
             </Button>
           </Box>
-
-          {/* btAddMyTravel   =====================================*/}
+          {/* btRegister   =====================================*/}
           <Button
             variant="contained"
             fullWidth
             sx={{ mt: 2, py: 2, backgroundColor: "#259e69" }}
             onClick={handleSaveTravelClick}
           >
-            บันทึการเดินทาง
+            บันทึกการเดินทาง
           </Button>
 
           <Link

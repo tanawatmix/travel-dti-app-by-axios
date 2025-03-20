@@ -1,3 +1,4 @@
+import axios from "axios"; //Use Axios
 import { React, useEffect, useState } from "react";
 import {
   Box,
@@ -38,11 +39,11 @@ function MyTravel() {
   useEffect(() => {
     //take data from localstorage and show at AppBar
     //read data in memory
-    
+   
     const traveller = JSON.parse(localStorage.getItem("traveller"));
 
     //take data from variable and use with state
-    
+   
     setTravellerFullname(traveller.travellerFullname);
 
     // setTravellerEmail(traveller.travellerEmail);
@@ -50,19 +51,17 @@ function MyTravel() {
 
     //Get data From DB of traveller that login and show in table
     const getAllTravel = async () => {
-      const resData = await fetch(
-        `http://localhost:4000/travel/${traveller.travellerId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+      const resData = await axios.get(
+        `http://localhost:4000/travel/${traveller.travellerId}`
       );
       //Have a data
       if (resData.status == 200) {
-        const data = await resData.json();
-        setTravel(data["data"]);
+        //Use Fetch===========================
+        // const data = await resData.json();
+        // setTravel(data["data"]);
+        
+        //Use Axios===========================
+        setTravel(resData.data["data"]);
       }
     };
     getAllTravel();
@@ -71,12 +70,17 @@ function MyTravel() {
   //Delete Click Func================================
   const handleDeleteTravelClick = async (travelId) => {
     try {
-      const response = await fetch(`http://localhost:4000/travel/${travelId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      //Use Fetch===========================
+      // const response = await fetch(`http://localhost:4000/travel/${travelId}`, {
+      //   method: "DELETE",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      // });
+      
+      //Use Axios===========================
+      const response = await axios.delete(`http://localhost:4000/travel/${travelId}`); 
+        
       if (response.status == 200) {
         alert("ลบข้อมูลเรียบร้อยOwO");
         // navigator("/mytravel");
@@ -108,7 +112,7 @@ function MyTravel() {
 
               {/* Go to editprofile*/}
               <Link to="/editprofile">
-                <Button color="inherit">{travellerFullname}</Button>
+                <Button color="warning">{travellerFullname}</Button>
               </Link>
               <Avatar
                 src={
@@ -186,7 +190,10 @@ function MyTravel() {
                     <TableCell align="center">{row.travelEndDate}</TableCell>
                     <TableCell align="center">{row.travelCostTotal}</TableCell>
                     <TableCell align="center">
-                      <Button component={Link} to={`/editmytravel/${row.travelId}`}>
+                      <Button
+                        component={Link}
+                        to={`/editmytravel/${row.travelId}`}
+                      >
                         แก้ไข
                       </Button>
                       <Button

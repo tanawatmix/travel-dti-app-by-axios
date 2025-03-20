@@ -1,3 +1,4 @@
+import axios from "axios";
 import { React, useState } from "react";
 import {
   Box,
@@ -51,9 +52,14 @@ function Register() {
 
       //send data from formData to API (http://localhost:4000/traveller) POST
       try {
-        const response = await fetch("http://localhost:4000/traveller/", {
-          method: "POST",
-          body: formData,
+        // const response = await fetch("http://localhost:4000/traveller/", {
+        //   method: "POST",
+        //   body: formData,
+        // });
+        const response = await axios.post("http://localhost:4000/traveller/", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         });
         if (response.status == 201) {
           alert("สมัครสมาชิกสําเร็จOwO");

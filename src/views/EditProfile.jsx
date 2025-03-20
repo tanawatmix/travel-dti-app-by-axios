@@ -1,24 +1,15 @@
-import {
-  Box,
-  AppBar,
-  Toolbar,
-  IconButton,
-  TextField,
-  Typography,
-  Button,
-  Avatar,
-} from "@mui/material";
+import {Box,AppBar,Toolbar,IconButton,TextField,Typography,Button,Avatar,} from "@mui/material";
+
 import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
-import { useEffect, useState } from "react";
-import Profile from "./../assets/profile.png";
-import { Link } from "react-router-dom";
+
 
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useEffect, useState } from "react";
-import { Link , useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { styled } from "@mui/material/styles";
 import Profile from "./../assets/profile.png";
 import Travel from "./../assets/travel.png";
+import axios from "axios"; //Use Axios
 //===========================End of Import======================================
 
 function EditProfile() {
@@ -30,16 +21,16 @@ function EditProfile() {
 
   const [travellerNewImage, setTravellerNewImage] = useState(null); //*****/
   const [travellerNewFullname, setTravellerNewFullname] = useState(""); //*****/
-
-
+  
   const navigator = useNavigate();
+
 
   //UseEffect ========================================
   useEffect(() => {
     //เอาข้อมูลใน memory มาแสดงที่ AppBar
     //อ่านข้อมูลจาก memory เก็บในตัวแปร
 
-    const traveller = JSON.parse(localStorage.getItem("traveller"));
+    const traveller = JSON.parse(localStorage.getItem("traveller")) || {};
 
     //เอาข้อมูลในตัวแปรกำหนดให้กับ state ที่สร้างไว้
     setTravellerFullname(traveller.travellerFullname);
@@ -48,17 +39,15 @@ function EditProfile() {
     setTravellerPassword(traveller.travellerPassword);
     setTravellerId(traveller.travellerId);
     setTravellerNewFullname(traveller.travellerFullname);
-    
-  }, []);
-//Select file func +++++++++++++++++++++++++++
+  }, [])
+  //Select file func +++++++++++++++++++++++++++
   const handleSelectFileClick = (e) => {
     const file = e.target.files[0];
 
     if (file) {
       setTravellerNewImage(file);
     }
-  };
-
+  }
   const SelectFileBt = styled("input")({
     clip: "rect(0 0 0 0)",
     clipPath: "inset(50%)",
@@ -71,8 +60,8 @@ function EditProfile() {
     width: 1,
   });
 
-   //EditClick func +++++++++++++++++++++++++++
-   const handleEditProfileClick = async (e) => {
+  //EditClick func +++++++++++++++++++++++++++
+  const handleEditProfileClick = async (e) => {
     //Validate Register Button
     e.preventDefault();
     if (travellerNewFullname.trim().length == 0) {
@@ -91,37 +80,49 @@ function EditProfile() {
       formData.append("travellerPassword", travellerPassword);
       formData.append("travellerId", travellerId);
 
-      if (travellerNewImage){
-        formData.append('travellerImage', travellerNewImage);
+      if (travellerNewImage) {
+        formData.append("travellerImage", travellerNewImage);
       }
 
       //Send data to API
       try {
-        const response = await fetch(`http://localhost:4000/traveller/${travellerId}`, {
-          method: "PUT",
-          body: formData,
-        });
+        // const response = await fetch(
+        //   `http://localhost:4000/traveller/${travellerId}`,
+        //   {
+        //     method: "PUT",
+        //     body: formData,
+        //   }
+        // );
+        const response = await axios.put(
+          `http://localhost:4000/traveller/${travellerId}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
         if (response.status == 200) {
-          alert("แก้ไขโปรไฟล์สําเร็จOwO");
-          localStorage.clear();//clear old data
-          const data = await response.json(); 
-          localStorage.setItem("traveller", JSON.stringify(data["data"]));//set new data
-          navigator("/mytravel");//go to MyTravel
-          // window.location.href("/")
-        } else {
-          alert("แก้ไขโปรไฟล์ไม่สำเร็จโปรดลองใหม่อีกครั้งTwT");
+          alert("แก้ไขข้อมูลเรียบร้อยแล้ว");
+          // const data = await response.json();
+          // localStorage.setItem("traveller", JSON.stringify(data["data"]));
+          localStorage.setItem(
+            "traveller",
+            JSON.stringify(response.data["data"])
+          );
+          navigator("/mytravel");
         }
       } catch (error) {
-        alert("พบข้อผิดพลาดในการแก้ไขโปรไฟล์", error);
+        alert("พบข้อผิดพลาด: " + error.message);
       }
     }
-  };
-  
+  }
 
   return (
     <>
       <Box sx={{ width: "100%" }}>
-      {/* AppBar ===============================================*/}
+        {/* AppBar ===============================================*/}
         <Box sx={{ flexGrow: 1 }}>
           <AppBar position="static">
             <Toolbar>
@@ -163,7 +164,7 @@ function EditProfile() {
             </Toolbar>
           </AppBar>
         </Box>
-         {/* AppBar ================================================*/}
+        {/* AppBar ================================================*/}
 
         <Box sx={{ width: "60%", boxShadow: 4, mx: "auto", p: 5, my: 4 }}>
           <Typography
@@ -243,13 +244,13 @@ function EditProfile() {
 
           {/* Edit Button   =====================================*/}
           <Link onClick={handleEditProfileClick}>
-          <Button
-            variant="contained"
-            fullWidth
-            sx={{ mt: 2, py: 2, backgroundColor: "#259e69" }}
-          >
-            แก้ไขข้อมูลส่วนตัว
-          </Button>
+            <Button
+              variant="contained"
+              fullWidth
+              sx={{ mt: 2, py: 2, backgroundColor: "#259e69" }}
+            >
+              แก้ไขข้อมูลส่วนตัว
+            </Button>
           </Link>
 
           <Link
