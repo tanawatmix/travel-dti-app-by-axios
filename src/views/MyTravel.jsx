@@ -1,5 +1,3 @@
-import axios from "axios"; //Use Axios
-import { React, useEffect, useState } from "react";
 import {
   Box,
   AppBar,
@@ -8,93 +6,103 @@ import {
   Typography,
   Button,
   Avatar,
+  dialogActionsClasses,
 } from "@mui/material";
-//Table Material
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-} from "@mui/material";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
 
+import React, { useEffect, useState } from "react";
 import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
 import Profile from "./../assets/profile.png";
 import Place from "./../assets/travel.png";
-import { Link, useNavigate } from "react-router-dom";
-
-//===========================End of Import======================================
+import { Link } from "react-router-dom";
+import { Try } from "@mui/icons-material";
+import axios from "axios";
 
 function MyTravel() {
   const [travellerFullname, setTravellerFullname] = useState("");
-  
   const [travellerImage, setTravellerImage] = useState("");
   const [travel, setTravel] = useState([]);
 
-  const navigator = useNavigate();
-
-  //Use Effect ========================================================
   useEffect(() => {
-    //take data from localstorage and show at AppBar
-    //read data in memory
-   
-    const traveller = JSON.parse(localStorage.getItem("traveller"));
+    const handleStorageChange = () => {
+      const traveller = JSON.parse(localStorage.getItem("traveller")) || {};
+      setTravellerFullname(traveller.travellerFullname || "");
+      setTravellerImage(traveller.travellerImage || "");
+    };
 
-    //take data from variable and use with state
-   
-    setTravellerFullname(traveller.travellerFullname);
+    window.addEventListener("storage", handleStorageChange);
+    handleStorageChange(); // โหลดข้อมูลครั้งแรก
 
-    // setTravellerEmail(traveller.travellerEmail);
-    setTravellerImage(traveller.travellerImage);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []); // ทำงานแค่ครั้งแรกเท่านั้น
 
-    //Get data From DB of traveller that login and show in table
+  useEffect(() => {
+    const traveller = JSON.parse(localStorage.getItem("traveller")) || {};
+    setTravellerFullname(traveller.travellerFullname || "");
+    setTravellerImage(traveller.travellerImage || "");
+
+    //ดึงขข้อมูลมาแสดง
     const getAllTravel = async () => {
+      // const resData = await fetch(
+      //   `http://localhost:4000/travel/${traveller.travellerId}`,
+      //   {
+      //     method: "GET",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //   }
+      // );
       const resData = await axios.get(
-        `http://localhost:4000/travel/${traveller.travellerId}`
+        `http://localhost:5175/${traveller.travellerId}`
       );
-      //Have a data
       if (resData.status == 200) {
-        //Use Fetch===========================
         // const data = await resData.json();
         // setTravel(data["data"]);
-        
-        //Use Axios===========================
         setTravel(resData.data["data"]);
       }
     };
     getAllTravel();
-  }, []);
+  }, []); // ทำงานแค่ครั้งแรกและเมื่อข้อมูลใน localStorage เปลี่ยนแปลง
 
-  //Delete Click Func================================
   const handleDeleteTravelClick = async (travelId) => {
     try {
-      //Use Fetch===========================
       // const response = await fetch(`http://localhost:4000/travel/${travelId}`, {
       //   method: "DELETE",
       //   headers: {
       //     "Content-Type": "application/json",
       //   },
       // });
-      
-      //Use Axios===========================
-      const response = await axios.delete(`http://localhost:4000/travel/${travelId}`); 
-        
-      if (response.status == 200) {
-        alert("ลบข้อมูลเรียบร้อยOwO");
-        // navigator("/mytravel");
-        window.location.reload();
+      const isConfirmed = window.confirm(
+        "คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลนี้?"
+      );
+      if (isConfirmed) {
+        const response = await axios.delete(
+          `travel-service-server-by-prisma-cpbu.vercel.app/travel/${travelId}`
+        );
+        if (response.status === 200) {
+          alert("ลบข้อมูลเรียบร้อยแล้ว");
+          window.location.href = "/mytravel";
+        } else {
+          alert("ลบข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+        }
       }
     } catch (error) {
-      alert("ข้อผิดพลาดในการลบข้อมูล");
+      alert("พบข้อผิดพลาด", error);
     }
   };
+
   return (
     <>
       <Box sx={{ width: "100%" }}>
         <Box sx={{ flexGrow: 1 }}>
-          {/* AppBar====================================== */}
           <AppBar position="static">
             <Toolbar>
               <IconButton
@@ -109,24 +117,29 @@ function MyTravel() {
               <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                 บันทึกการเดินทาง
               </Typography>
-
-              {/* Go to editprofile*/}
-              <Link to="/editprofile">
-                <Button color="warning">{travellerFullname}</Button>
+              <Link
+                to="/editprofile"
+                style={{
+                  textDecoration: "none",
+                  color: "white",
+                  marginLeft: "10px",
+                  fontWeight: "bold",
+                }}
+              >
+                <Button color="inherit">{travellerFullname}</Button>
               </Link>
               <Avatar
                 src={
-                  travellerImage
-                    ? `http://localhost:4000/images/traveller/${travellerImage}`
-                    : Profile
+                  travellerImage === ""
+                    ? Profile
+                    : `${travellerImage}`
                 }
               />
-              {/* Link Logout*/}
               <Link
-                to="/"
+                to={"/"}
                 style={{
-                  color: "red",
                   textDecoration: "none",
+                  color: "red",
                   marginLeft: "10px",
                   fontWeight: "bold",
                 }}
@@ -135,64 +148,60 @@ function MyTravel() {
               </Link>
             </Toolbar>
           </AppBar>
-          {/* End of AppBar======================================*/}
         </Box>
         <Box sx={{ width: "70%", boxShadow: 4, mx: "auto", p: 5, my: 4 }}>
-          {/* Travel Head Text */}
           <Typography
             variant="h4"
             component="div"
-            sx={{ textAlign: "center", mb: 2 }}
+            sx={{ textAlign: "center", mb: 4 }}
           >
             การเดินทางของฉัน
           </Typography>
-
-          {/* Display travel_tb=============================== */}
-          <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 450 }} aria-label="simple table">
-              {/* Table Head */}
+          <TableContainer component={Paper} sx={{ mx: "auto" }}>
+            <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableHead>
-                <TableRow sx={{ backgroundColor: "#aaaaaa" }}>
+                <TableRow sx={{ backgroundColor: "#1E90FF" }}>
                   <TableCell align="center">No.</TableCell>
                   <TableCell align="center">สถานที่ไป</TableCell>
                   <TableCell align="center">รูป</TableCell>
                   <TableCell align="center">วันที่ไป</TableCell>
                   <TableCell align="center">วันที่กลับ</TableCell>
                   <TableCell align="center">ค่าใช้จ่ายทั้งหมด</TableCell>
-                  <TableCell align="center"></TableCell>
+                  <TableCell align="center">#</TableCell>
                 </TableRow>
               </TableHead>
-              {/* Table Body */}
               <TableBody>
                 {travel.map((row, index) => (
                   <TableRow
                     key={index}
                     sx={{
                       "&:last-child td, &:last-child th": { border: 0 },
-                      backgroundColor: index % 2 === 0 ? "ffffff" : "#ffc0cb",
+                      backgroundColor:
+                        (index + 1) % 2 == 0 ? "#ffffff" : "#e3f2fd",
                     }}
                   >
-                    <TableCell align="center">{index + 1}</TableCell>
-                    <TableCell align="center">{row.travelPlace}</TableCell>
+                    <TableCell align="left">{index + 1}</TableCell>
+                    <TableCell align="left">{row.travelPlace}</TableCell>
                     <TableCell align="center">
-                      {/* TravelImage */}
-                      <Avatar
-                        src={
-                          row.travelImage
-                            ? `http://localhost:4000/images/travel/${row.travelImage}`
-                            : Place
-                        }
-                        sx={{ width: 60, height: 60, boxShadow: 4 }}
-                        variant="rounded"
-                      />
+                      {
+                        <Avatar
+                          src={
+                            row.travelImage == ""
+                              ? Place
+                              : `${row.travelImage}`
+                          }
+                          sx={{ width: 60, height: 60, boxShadow: 3 }}
+                          variant="rounded"
+                        />
+                      }
                     </TableCell>
-                    <TableCell align="center">{row.travelStartDate}</TableCell>
-                    <TableCell align="center">{row.travelEndDate}</TableCell>
-                    <TableCell align="center">{row.travelCostTotal}</TableCell>
+                    <TableCell align="left">{row.travelStartDate}</TableCell>
+                    <TableCell align="left">{row.travelEndDate}</TableCell>
+                    <TableCell align="right">{row.travelCostTotal}</TableCell>
                     <TableCell align="center">
                       <Button
                         component={Link}
-                        to={`/editmytravel/${row.travelId}`}
+                        to={`${row.travelId}`}
                       >
                         แก้ไข
                       </Button>
@@ -207,26 +216,20 @@ function MyTravel() {
               </TableBody>
             </Table>
           </TableContainer>
-          {/* Go to AddMyTravel============================================*/}
           <Link
             to="/addmytravel"
             style={{
-              color: "white",
               textDecoration: "none",
-
-              fontWeight: "bold",
-
             }}
           >
             <Button
               fullWidth
               variant="contained"
-              sx={{ py: 2, my: 2, mx: "auto" }}
+              sx={{ py: 2, mt: 4, mx: "auto" }}
             >
               เพิ่มการเดินทาง
             </Button>
           </Link>
-
         </Box>
       </Box>
     </>

@@ -1,7 +1,15 @@
-import {Box,AppBar,Toolbar,IconButton,Typography,Button,Avatar,TextField,styled,
+import {
+  Box,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Typography,
+  Button,
+  Avatar,
+  TextField,
+  styled,
 } from "@mui/material";
 import React from "react";
-
 import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useEffect, useState } from "react";
@@ -21,7 +29,7 @@ function AddMyTravel() {
   const [travelEndDate, seTtravelEndDate] = useState("");
   const [travellerId, setTravellerId] = useState("");
 
- const handleSelectFileClick = (e) => {
+  const handleSelectFileClick = (e) => {
     const file = e.target.files[0];
     if (file) {
       setTravelImage(file);
@@ -41,7 +49,7 @@ function AddMyTravel() {
   });
 
   const handleSaveTravelClick = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
     if (travelPlace.trim().length == 0) {
       alert("ป้อนสถานที่ด้วย");
     } else if (travelStartDate.trim().length == 0) {
@@ -52,13 +60,12 @@ function AddMyTravel() {
       alert("ป้อนค่าใช้จ่ายด้วย");
     } else {
       //ส่งข้อมูลไปให้ API บันทึงลง DB แล้ว redirect ไปหน้า Login
-    const formData = new FormData();
+      const formData = new FormData();
 
       formData.append("travelPlace", travelPlace);
       formData.append("travelCostTotal", travelCostTotal);
       formData.append("travelStartDate", travelStartDate);
       formData.append("travelEndDate", travelEndDate);
-      
       formData.append("travellerId", travellerId);
 
       if (travelImage) {
@@ -70,7 +77,7 @@ function AddMyTravel() {
         //   method: "POST",
         //   body: formData,
         // });
-        const response = await axios.post("http://localhost:4000/travel/", formData,{
+        const response = await axios.post("travel-service-server-by-prisma-cpbu.vercel.app/travel/", formData,{
           headers: {
             "Content-Type": "multipart/form-data",
           },
@@ -129,14 +136,12 @@ function AddMyTravel() {
                 src={
                   travellerImage == ""
                     ? Profile
-                    : `http://localhost:4000/images/traveller/${travellerImage}`
+                    : `${travellerImage}`
                 }
               />
-
               <Link
                 to={"/"}
                 style={{
-
                   textDecoration: "none",
                   color: "red",
                   marginLeft: "10px",
@@ -173,7 +178,6 @@ function AddMyTravel() {
           <Typography sx={{ fontWeight: "bold", mt: 4, mb: 1 }}>
             สถานที่ที่เดินทางไป
           </Typography>
-
           <TextField
             fullWidth
             value={travelPlace}
@@ -195,7 +199,6 @@ function AddMyTravel() {
           <Typography sx={{ fontWeight: "bold", mt: 4, mb: 1 }}>
             วันที่เดินทางกลับ
           </Typography>
-
           <TextField
             fullWidth
             value={travelEndDate}
@@ -206,7 +209,6 @@ function AddMyTravel() {
           <Typography sx={{ fontWeight: "bold", mt: 4, mb: 1 }}>
             ต่าใช้จ่ายในการเดินทาง
           </Typography>
-
           <TextField
             fullWidth
             type="number"
@@ -264,7 +266,6 @@ function AddMyTravel() {
           >
             บันทึกการเดินทาง
           </Button>
-
           <Link
             to="/mytravel"
             style={{ textDecoration: "none", color: "#259e69" }}

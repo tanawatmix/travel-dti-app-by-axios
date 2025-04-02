@@ -17,15 +17,14 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/MyTravel" element={<MyTravel />} />
+        <Route path="/mytravel" element={<MyTravel />} />
         <Route path="/editprofile" element={<EditProfile />} />
         <Route path="/editmytravel/:travelId" element={<EditMyTravel />} />
         <Route path="/addmytravel" element={<AddMyTravel />} />
       </Routes>
     </BrowserRouter>
     </>
-
-)
+  )
 }
 
 export default App

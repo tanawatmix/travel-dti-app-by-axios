@@ -1,5 +1,5 @@
-import axios from "axios";
 import { React, useState } from "react";
+
 import {
   Box,
   Typography,
@@ -12,6 +12,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { Link, useNavigate } from "react-router-dom";
 import Travel from "./../assets/travel.png";
 import Profile from "./../assets/profile.png";
+import axios from "axios";
 
 function Register() {
   const [travellerImage, setTravellerImage] = useState(null);
@@ -20,6 +21,7 @@ function Register() {
   const [travellerPassword, setTravellerPassword] = useState("");
 
   const navigator = useNavigate();
+
   const handleSelectFileClick = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -38,8 +40,7 @@ function Register() {
     } else if (travellerPassword.trim().length == 0) {
       alert("ป้อนรหัสผ่านด้วย");
     } else {
-      //Send data to API, save to DB and redirect to Login page.
-      //Packing data
+      //ส่งข้อมูลไปให้ API บันทึงลง DB แล้ว redirect ไปหน้า Login
       const formData = new FormData();
 
       formData.append("travellerFullname", travellerFullname);
@@ -49,28 +50,29 @@ function Register() {
       if (travellerImage) {
         formData.append("travellerImage", travellerImage);
       }
-
-      //send data from formData to API (http://localhost:4000/traveller) POST
+      //ส่งข้อมูลไปให้ API (https://localhost:4000/traveller/) บันทึงลง DB
       try {
         // const response = await fetch("http://localhost:4000/traveller/", {
         //   method: "POST",
         //   body: formData,
         // });
-        const response = await axios.post("http://localhost:4000/traveller/", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        const response = await axios.post(
+          "travel-service-server-by-prisma-cpbu.vercel.app/traveller/",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
         if (response.status == 201) {
-          alert("สมัครสมาชิกสําเร็จOwO");
+          alert("ลงทะเบียนสําเร็จ");
           navigator("/");
-          // window.location.href("/")
-        } else {
-          alert("สมัครสมาชิกไม่สำเร็จดปรดลองใหม่อีกครั้งTwT");
+        }else {
+          alert("ลงทะเบียนไม่สําเร็จ กรุณาลองใหม่อีกครั้ง");
         }
       } catch (error) {
-        alert("พบข้อผิดพลาดในการสมัครสมาชิก", error);
-        
+        alert("พบข้อผิดพลาด", error);
       }
     }
   };
@@ -201,8 +203,7 @@ function Register() {
           >
             กลับไปหน้าLogin
           </Typography>
-        </Link>
-
+      </Link>
       </Box>
     </Box>
   );

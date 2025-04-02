@@ -1,4 +1,14 @@
-import {Box,AppBar,Toolbar,IconButton,Typography,Button,Avatar,TextField,styled,hexToRgb,
+import {
+  Box,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Typography,
+  Button,
+  Avatar,
+  TextField,
+  styled,
+  hexToRgb,
 } from "@mui/material";
 import React from "react";
 import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
@@ -13,7 +23,6 @@ function EditMyTravel() {
   const [travellerFullname, setTravellerFullname] = useState("");
   const [travellerImage, setTravellerImage] = useState("");
 
-
   const [travelImage, setTravelImage] = useState("");
   const [travelNewImage, setTravelNewImage] = useState(null);
 
@@ -22,7 +31,8 @@ function EditMyTravel() {
   const [travelStartDate, setTravelStartDate] = useState("");
   const [travelEndDate, seTtravelEndDate] = useState("");
   const [travellerId, setTravellerId] = useState("");
-    const handleSelectFileClick = (e) => {
+
+  const handleSelectFileClick = (e) => {
     const file = e.target.files[0];
     if (file) {
       setTravelNewImage(file);
@@ -40,14 +50,12 @@ function EditMyTravel() {
       alert("ป้อนค่าใช้จ่ายด้วย");
     } else {
       //ส่งข้อมูลไปให้ API บันทึงลง DB แล้ว redirect ไปหน้า Login
-      
       const formData = new FormData();
 
       formData.append("travelPlace", travelPlace);
       formData.append("travelCostTotal", travelCostTotal);
       formData.append("travelStartDate", travelStartDate);
       formData.append("travelEndDate", travelEndDate);
-      
       formData.append("travellerId", travellerId);
 
       if (travelNewImage) {
@@ -63,7 +71,7 @@ function EditMyTravel() {
         //   }
         // );
         const response = await axios.put(
-          `http://localhost:4000/travel/${travelId}`,
+          `travel-service-server-by-prisma-cpbu.vercel.app/travel/${travelId}`,
           formData,{
             headers: {
               "Content-Type": "multipart/form-data",
@@ -115,7 +123,7 @@ function EditMyTravel() {
       //   }
       // );
       const resData = await axios.get(
-        `http://localhost:4000/travel/one/${travelId}`
+        `travel-service-server-by-prisma-cpbu.vercel.app/travel/one/${travelId}`
       );
 
       // const data = await resData.json();
@@ -164,7 +172,7 @@ function EditMyTravel() {
               src={
                 travellerImage == ""
                   ? Profile
-                  : `http://localhost:4000/images/traveller/${travellerImage}`
+                  : `${travellerImage}`
               }
             />
             <Link
@@ -259,7 +267,7 @@ function EditMyTravel() {
             travelNewImage == null
               ? travelImage == ""
                 ? Travel
-                : `http://localhost:4000/images/travel/${travelImage}`
+                : `${travelImage}`
               : URL.createObjectURL(travelNewImage)
           }
           alt="Place"
